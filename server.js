@@ -12,9 +12,8 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Serve static files from the React build
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'build')));
-}
+app.use(express.static(path.join(__dirname, 'build')));
+
 
 // Data file path
 const dataFile = path.join(__dirname, 'data', 'runs.json');
@@ -120,11 +119,9 @@ app.get('/api/health', (req, res) => {
 });
 
 // Serve React app for all other routes (SPA routing)
-if (process.env.NODE_ENV === 'production') {
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
-  });
-}
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
