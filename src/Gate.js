@@ -7,7 +7,7 @@ function Gate({ onPass }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (answer.toLowerCase() === "smith") { // Replace "smith" with the correct answer
+    if (answer.toLowerCase() === "reynolds") { // Updated correct answer to 'reynolds'
       onPass();
     } else {
       setError("Incorrect answer. Please try again.");

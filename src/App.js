@@ -408,10 +408,12 @@ function App() {
 
   useEffect(() => {
     const gateStatus = localStorage.getItem('gatePassed');
+    console.log('Gate status from localStorage:', gateStatus);
     setIsGatePassed(gateStatus === 'true');
   }, []);
 
   const handleGatePass = () => {
+    console.log('Gate passed, setting localStorage and state');
     localStorage.setItem('gatePassed', 'true');
     setIsGatePassed(true);
   };
