@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import Gate from './Gate';
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
@@ -402,6 +403,22 @@ function App() {
       </div>
     </div>
   );
+
+  const [isGatePassed, setIsGatePassed] = useState(false);
+
+  useEffect(() => {
+    const gateStatus = localStorage.getItem('gatePassed');
+    setIsGatePassed(gateStatus === 'true');
+  }, []);
+
+  const handleGatePass = () => {
+    localStorage.setItem('gatePassed', 'true');
+    setIsGatePassed(true);
+  };
+
+  if (!isGatePassed) {
+    return <Gate onPass={handleGatePass} />;
+  }
 
   return (
     <div className="App">
