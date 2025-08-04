@@ -10,6 +10,9 @@ function App() {
   const [formEmail, setFormEmail] = useState("");
   const [formPhone, setFormPhone] = useState("");
   const [formMessage, setFormMessage] = useState("");
+  const [contactLoading, setContactLoading] = useState(false);
+  const [contactError, setContactError] = useState("");
+  const [contactSuccess, setContactSuccess] = useState(false);
 
   // Add Your Run state
   const [totalKm, setTotalKm] = useState(20);
@@ -25,8 +28,11 @@ function App() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  // Gate state
+  const [isGatePassed, setIsGatePassed] = useState(false);
+
   // API base URL
-  const API_BASE = process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:5000/api';
+  const API_BASE = process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:5001/api';
 
   const galleryImages = [
     '/gallery/WhatsApp Image 2025-07-27 at 11.02.34.jpeg',
@@ -84,6 +90,13 @@ function App() {
     }
   }, [lightboxOpen, galleryImages.length]);
 
+  // Gate effect
+  useEffect(() => {
+    const gateStatus = localStorage.getItem('gatePassed');
+    console.log('Gate status from localStorage:', gateStatus);
+    setIsGatePassed(gateStatus === 'true');
+  }, []);
+
   const handleJoinRun = () => {
     setActiveTab('contact');
     setFormMessage("Please add me to the WhatsApp group for run updates!");
@@ -94,13 +107,42 @@ function App() {
   };
 
   // Contact form submit handler
-  const handleContactSubmit = (e) => {
+  const handleContactSubmit = async (e) => {
     e.preventDefault();
-    const subject = encodeURIComponent("Please add me to WhatsApp group");
-    const body = encodeURIComponent(
-      `Name: ${formName}\nEmail: ${formEmail}\nPhone: ${formPhone}\n\n${formMessage}`
-    );
-    window.location.href = `mailto:paulandrewfarrow@gmail.com?subject=${subject}&body=${body}`;
+    setContactLoading(true);
+    setContactError("");
+    setContactSuccess(false);
+
+    try {
+      const response = await fetch(`${API_BASE}/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formName,
+          email: formEmail,
+          phone: formPhone,
+          message: formMessage
+        })
+      });
+
+      if (response.ok) {
+        setContactSuccess(true);
+        setFormName("");
+        setFormEmail("");
+        setFormPhone("");
+        setFormMessage("");
+      } else {
+        const errorData = await response.json();
+        setContactError(errorData.error || "Failed to send message. Please try again.");
+      }
+    } catch (error) {
+      console.error('Error sending contact form:', error);
+      setContactError("Network error. Please check your connection and try again.");
+    } finally {
+      setContactLoading(false);
+    }
   };
 
   // Add Your Run handler
@@ -371,6 +413,16 @@ function App() {
       </div>
       <div className="contact-form">
         <h3>Send us a message</h3>
+        {contactSuccess && (
+          <div className="contact-success">
+            ✅ Message sent successfully! We'll get back to you soon.
+          </div>
+        )}
+        {contactError && (
+          <div className="contact-error">
+            ❌ {contactError}
+          </div>
+        )}
         <form onSubmit={handleContactSubmit}>
           <input
             type="text"
@@ -378,6 +430,7 @@ function App() {
             value={formName}
             onChange={e => setFormName(e.target.value)}
             required
+            disabled={contactLoading}
           />
           <input
             type="email"
@@ -385,32 +438,29 @@ function App() {
             value={formEmail}
             onChange={e => setFormEmail(e.target.value)}
             required
+            disabled={contactLoading}
           />
           <input
             type="tel"
             placeholder="Your Phone Number (optional)"
             value={formPhone}
             onChange={e => setFormPhone(e.target.value)}
+            disabled={contactLoading}
           />
           <textarea
             placeholder="Your Message"
             value={formMessage}
             onChange={e => setFormMessage(e.target.value)}
             required
+            disabled={contactLoading}
           ></textarea>
-          <button type="submit" className="submit-btn">Send Message</button>
+          <button type="submit" className="submit-btn" disabled={contactLoading}>
+            {contactLoading ? 'Sending...' : 'Send Message'}
+          </button>
         </form>
       </div>
     </div>
   );
-
-  const [isGatePassed, setIsGatePassed] = useState(false);
-
-  useEffect(() => {
-    const gateStatus = localStorage.getItem('gatePassed');
-    console.log('Gate status from localStorage:', gateStatus);
-    setIsGatePassed(gateStatus === 'true');
-  }, []);
 
   const handleGatePass = () => {
     console.log('Gate passed, setting localStorage and state');

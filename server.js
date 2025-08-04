@@ -1,19 +1,30 @@
+// Load environment variables from .env file
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
+const sgMail = require('@sendgrid/mail');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
+
+// Initialize SendGrid with API key
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
+if (SENDGRID_API_KEY) {
+  sgMail.setApiKey(SENDGRID_API_KEY);
+}
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
 // Serve static files from the React build
-app.use(express.static(path.join(__dirname, 'build')));
-
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'build')));
+}
 
 // Data file path
 const dataFile = path.join(__dirname, 'data', 'runs.json');
@@ -113,20 +124,91 @@ app.post('/api/runs', (req, res) => {
   }
 });
 
+// POST /api/contact - Send email via SendGrid
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, phone, message } = req.body;
+    
+    // Validation
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: 'Name, email, and message are required' });
+    }
+    
+    // Check if SendGrid is configured
+    if (!SENDGRID_API_KEY) {
+      console.error('SendGrid API key not configured');
+      return res.status(500).json({ error: 'Email service not configured' });
+    }
+    
+    // Create email message
+    const msg = {
+      to: 'paulandrewfarrow@gmail.com',
+      from: 'paulandrewfarrow@gmail.com', // Using your verified Gmail
+      subject: 'Message from Dave\'s Running Club website',
+      text: `
+Name: ${name}
+Email: ${email}
+Phone: ${phone || 'Not provided'}
+
+Message:
+${message}
+      `,
+      html: `
+<h2>New Message from Dave's Running Club Website</h2>
+<p><strong>Name:</strong> ${name}</p>
+<p><strong>Email:</strong> ${email}</p>
+<p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+<p><strong>Message:</strong></p>
+<p>${message.replace(/\n/g, '<br>')}</p>
+      `
+    };
+    
+    // Send email
+    console.log('Attempting to send email with SendGrid...');
+    console.log('From:', msg.from);
+    console.log('To:', msg.to);
+    console.log('Subject:', msg.subject);
+    
+    try {
+      await sgMail.send(msg);
+      console.log('✅ Email sent successfully via SendGrid');
+      res.json({ success: true, message: 'Email sent successfully' });
+    } catch (sendError) {
+      console.error('❌ SendGrid error details:', sendError);
+      console.error('❌ SendGrid response:', sendError.response?.body);
+      throw sendError;
+    }
+  } catch (error) {
+    console.error('Error sending email:', error);
+    res.status(500).json({ error: 'Failed to send email' });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Dave\'s Running Club API is running' });
+  res.json({ 
+    status: 'OK', 
+    message: 'Dave\'s Running Club API is running',
+    sendgrid: SENDGRID_API_KEY ? 'Configured' : 'Not configured'
+  });
 });
 
 // Serve React app for all other routes (SPA routing)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 API available at http://localhost:${PORT}/api`);
   if (process.env.NODE_ENV === 'production') {
     console.log(`🌐 Production mode: serving React app`);
+  }
+  if (SENDGRID_API_KEY) {
+    console.log(`📧 SendGrid configured`);
+  } else {
+    console.log(`⚠️ SendGrid not configured - set SENDGRID_API_KEY environment variable`);
   }
 }); 
