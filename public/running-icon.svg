@@ -1,0 +1,19 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="15" fill="#4CAF50" stroke="#2E7D32" stroke-width="2"/>
+  
+  <!-- Running stick figure -->
+  <!-- Head -->
+  <circle cx="16" cy="8" r="3" fill="white"/>
+  
+  <!-- Body -->
+  <line x1="16" y1="11" x2="16" y2="18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Arms -->
+  <line x1="16" y1="12" x2="12" y2="14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <line x1="16" y1="12" x2="20" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Legs -->
+  <line x1="16" y1="18" x2="13" y2="22" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <line x1="16" y1="18" x2="19" y2="24" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</svg> 

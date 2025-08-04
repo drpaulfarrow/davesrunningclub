@@ -5,7 +5,7 @@ RESOURCE_GROUP="daves-running-club-rg"
 APP_NAME="daves-running-club"
 LOCATION="uksouth"
 PLAN_NAME="${APP_NAME}-plan"
-NODE_VERSION="18-lts"
+NODE_VERSION="22-lts"
 # =============================
 
 echo "🚀 Starting Azure deployment for Dave's Running Club..."
