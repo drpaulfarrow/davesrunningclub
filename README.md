@@ -116,3 +116,32 @@ This project is dedicated to Dave's memory and the running community.
 ---
 
 **Remember**: Mental health matters. You are not alone. 💙
+
+## Admin Features
+
+### Photo Approval System
+- **Admin Access**: Visit `/admin` or click the "Admin" link in the footer
+- **Default Password**: `dave2025` (can be changed via environment variable `ADMIN_PASSWORD`)
+- **Photo Review**: Admins can view pending photos and approve/reject them
+- **Approved Photos**: Only approved photos appear in the public gallery
+- **Rejected Photos**: Rejected photos are permanently deleted
+
+### Admin Workflow
+1. Visit `/admin` or click the "Admin" link in the footer
+2. Enter admin password (`dave2025`)
+3. View pending photos in the dedicated admin panel
+4. Click "Approve" or "Reject" for each photo
+5. Approved photos immediately appear in the public gallery
+
+### Admin Features
+- **Dedicated Admin Page**: Separate `/admin` route for clean admin interface
+- **Photo Queue**: View all pending photo uploads
+- **One-Click Actions**: Approve or reject photos with single clicks
+- **Real-time Updates**: Approved photos immediately appear in gallery
+- **Secure Access**: Password-protected admin panel
+
+### Photo Upload Process
+1. **Users upload photos** → Photos are stored with "pending" status
+2. **Admin reviews** → Visit `/admin` to see pending photos
+3. **Admin approves/rejects** → Photos appear/disappear from gallery
+4. **User feedback** → Users see success message explaining approval process
